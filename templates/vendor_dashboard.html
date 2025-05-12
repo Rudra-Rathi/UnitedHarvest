@@ -1,0 +1,293 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header Section -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Vendor Dashboard</h1>
+        <a href="{{ url_for('browse_products') }}" class="d-none d-sm-inline-block btn btn-primary shadow-sm">
+            <i class="fas fa-shopping-cart fa-sm text-white-50 me-1"></i> Browse Products
+        </a>
+    </div>
+
+    <!-- Stats Cards Row -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                All Orders</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ orders|length }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Active Orders</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ orders|selectattr('status', 'in', ['pending', 'negotiating', 'accepted'])|list|length }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Pending Negotiations</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ pending_negotiations|length }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-comments fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Completed Orders</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ orders|selectattr('status', 'equalto', 'completed')|list|length }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Row -->
+    <div class="row">
+        <!-- Market Trends Summary -->
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Market Trends</h6>
+                    <a href="{{ url_for('daily_mandi') }}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <h5 class="small text-muted text-uppercase mb-1">Average Prices Today</h5>
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="card bg-light mb-2">
+                                    <div class="card-body py-2">
+                                        <p class="small text-muted mb-0">Vegetables</p>
+                                        <h4 class="mb-0 text-success">₹45<small>/kg</small></h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="card bg-light mb-2">
+                                    <div class="card-body py-2">
+                                        <p class="small text-muted mb-0">Fruits</p>
+                                        <h4 class="mb-0 text-warning">₹85<small>/kg</small></h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h6 class="font-weight-bold small">Trending Products</h6>
+                    <div class="list-group list-group-flush small mb-4">
+                        <a href="#" class="list-group-item list-group-item-action px-0 d-flex justify-content-between align-items-center">
+                            <span>Tomatoes</span>
+                            <span class="text-success">₹40/kg <i class="fas fa-arrow-down text-danger"></i></span>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action px-0 d-flex justify-content-between align-items-center">
+                            <span>Potatoes</span>
+                            <span class="text-success">₹22/kg <i class="fas fa-arrow-up text-success"></i></span>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action px-0 d-flex justify-content-between align-items-center">
+                            <span>Apples</span>
+                            <span class="text-success">₹120/kg <i class="fas fa-minus text-muted"></i></span>
+                        </a>
+                    </div>
+                    
+                    <div class="text-center">
+                        <a href="{{ url_for('daily_mandi') }}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-chart-line me-1"></i> View Daily Mandi
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Orders -->
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Recent Orders</h6>
+                </div>
+                <div class="card-body">
+                    {% if orders %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Order #</th>
+                                        <th>Product</th>
+                                        <th>Quantity</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in orders %}
+                                    <tr>
+                                        <td><a href="{{ url_for('order_details', order_id=order.id) }}">{{ order.order_number }}</a></td>
+                                        <td>
+                                            {% if order.items|length > 0 %}
+                                                {{ order.items[0].product.name }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if order.items|length > 0 %}
+                                                {{ order.items[0].quantity }} kg
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>₹{{ order.total_amount }}</td>
+                                        <td><span class="status-badge status-{{ order.status }}">{{ order.status|capitalize }}</span></td>
+                                        <td>{{ order.created_at.strftime('%d %b') }}</td>
+                                        <td>
+                                            <a href="{{ url_for('order_details', order_id=order.id) }}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                            <p class="lead">You haven't placed any orders yet.</p>
+                            <a href="{{ url_for('browse_products') }}" class="btn btn-primary">
+                                <i class="fas fa-search me-1"></i> Browse Products
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Available Products & Negotiations -->
+    <div class="row">
+        <!-- Available Products -->
+        <div class="col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Recently Added Products</h6>
+                    <a href="{{ url_for('browse_products') }}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    {% if available_products %}
+                        <div class="row">
+                            {% for product in available_products %}
+                            <div class="col-md-6 col-lg-4 mb-4">
+                                <div class="card product-card h-100">
+                                    <div class="card-body">
+                                        <span class="product-category">{{ product.category|capitalize }}</span>
+                                        <h5 class="card-title">{{ product.name }}</h5>
+                                        <p class="card-text mb-1">
+                                            <span class="product-price">₹{{ product.price_per_kg }}</span> per kg
+                                        </p>
+                                        <p class="card-text small text-muted">
+                                            Available: {{ product.available_quantity }} kg
+                                        </p>
+                                        <p class="card-text small">
+                                            Farmer: {{ product.farmer.full_name }}
+                                        </p>
+                                    </div>
+                                    <div class="card-footer bg-transparent border-top-0">
+                                        <a href="{{ url_for('place_order', product_id=product.id) }}" class="btn btn-sm btn-primary d-block">
+                                            <i class="fas fa-shopping-cart me-1"></i> Order Now
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-leaf fa-3x text-muted mb-3"></i>
+                            <p>No products available at the moment.</p>
+                            <p>Check back later or contact support for assistance.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pending Negotiations -->
+        <div class="col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Pending Negotiations</h6>
+                </div>
+                <div class="card-body">
+                    {% if pending_negotiations %}
+                        <div class="list-group">
+                            {% for order, negotiation in pending_negotiations %}
+                                <a href="{{ url_for('order_details', order_id=order.id) }}" class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">Order #{{ order.order_number }}</h6>
+                                        <small>{{ negotiation.created_at.strftime('%d %b, %H:%M') }}</small>
+                                    </div>
+                                    <p class="mb-1">
+                                        <span class="text-primary">Counter Offer: ₹{{ negotiation.proposed_price }}</span> per kg
+                                    </p>
+                                    <small>
+                                        <i class="fas fa-user me-1"></i> {{ order.seller.full_name }}
+                                        {% if negotiation.message %}
+                                        <br><i class="fas fa-comment-alt me-1"></i> "{{ negotiation.message }}"
+                                        {% endif %}
+                                    </small>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+                            <p>No pending negotiations at the moment.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

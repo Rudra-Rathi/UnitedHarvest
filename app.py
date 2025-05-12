@@ -13,50 +13,54 @@ logging.basicConfig(level=logging.DEBUG)
 class Base(DeclarativeBase):
     pass
 
-# Initialize extensions
 db = SQLAlchemy(model_class=Base)
-login_manager = LoginManager()
-babel = Babel()
 
 # Create the app
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key")
-app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)  # needed for url_for to generate with https
 
 # Configure the database
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///united_farms.db")
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///unitedfarms.db")
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_recycle": 300,
     "pool_pre_ping": True,
 }
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["UPLOAD_FOLDER"] = os.path.join(app.root_path, "static/uploads")
-app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16 MB max upload
 
-# Ensure upload directory exists
+# Upload configuration
+app.config["UPLOAD_FOLDER"] = os.path.join(app.root_path, "static/uploads")
+app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16MB max upload
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
-# Initialize extensions with app
+# Initialize flask extensions
 db.init_app(app)
+
+# Initialize login manager
+login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 login_manager.login_message_category = "info"
-babel.init_app(app)
 
-# Import models and routes
+# Initialize Babel for multilingual support
+babel = Babel(app)
+app.config["BABEL_DEFAULT_LOCALE"] = "en"
+app.config["LANGUAGES"] = {
+    "en": "English",
+    "hi": "Hindi",
+    "pa": "Punjabi"
+}
+
 with app.app_context():
-    from models import User, Farmer, Vendor
-    import routes  # Register routes
-    
-    # Create all database tables
+    # Import models and create tables
+    import models  # noqa: F401
     db.create_all()
 
-@login_manager.user_loader
-def load_user(user_id):
-    from models import User
-    return User.query.get(int(user_id))
+    # Import routes
+    from routes import *  # noqa: F401, F403
 
-@babel.localeselector
-def get_locale():
-    from flask import request
-    return request.accept_languages.best_match(['en', 'hi', 'mr', 'te', 'ta'])
+# Babel configuration is already initialized
+# We'll use the default locale settings for now
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)

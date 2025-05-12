@@ -1,0 +1,197 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="negotiation-container">
+                <!-- Header -->
+                <div class="mb-4">
+                    <h2 class="mb-2">{{ 'Place Order' if action == 'place_order' else 'Counter Offer' }}</h2>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{{ url_for('vendor_dashboard') }}">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="{{ url_for('browse_products') }}">Products</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">{{ 'Place Order' if action == 'place_order' else 'Counter Offer' }}</li>
+                        </ol>
+                    </nav>
+                </div>
+                
+                <!-- Product Information -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h4>{{ product.name }}</h4>
+                                <span class="product-category mb-2 d-inline-block">{{ product.category|capitalize }}</span>
+                                
+                                {% if product.description %}
+                                <p>{{ product.description }}</p>
+                                {% endif %}
+                                
+                                <div class="d-flex flex-wrap gap-3 mt-3 mb-2">
+                                    <div>
+                                        <small class="text-muted d-block">Farmer</small>
+                                        <span>{{ product.farmer.full_name }}</span>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted d-block">Available</small>
+                                        <span>{{ product.available_quantity }} kg</span>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted d-block">Listed Price</small>
+                                        <span id="original-price" data-original-price="{{ product.price_per_kg }}">₹{{ product.price_per_kg }} per kg</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                                <h5 class="text-muted mb-3">Order Information</h5>
+                                <p class="mb-1">Minimum Order: <strong>200 kg</strong></p>
+                                <p class="mb-1">Commission: <strong>5%</strong></p>
+                                <p class="mb-0 small text-muted">You can negotiate up to 3 times</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Order Form -->
+                <div class="card shadow mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            {{ 'Place Order Request' if action == 'place_order' else 'Submit Counter Offer' }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('place_order', product_id=product.id) if action == 'place_order' else url_for('negotiate_order', order_id=order.id) }}">
+                            {{ form.hidden_tag() }}
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-6 mb-3 mb-md-0">
+                                    <label for="quantity" class="form-label">Quantity (kg)</label>
+                                    <div class="input-group">
+                                        {{ form.quantity(class="form-control", min="200", id="quantity") if action == 'place_order' else '<input type="text" class="form-control" value="' ~ order.items[0].quantity ~ '" disabled>'|safe }}
+                                        <span class="input-group-text">kg</span>
+                                    </div>
+                                    {% if form.quantity.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.quantity.errors %}
+                                                <span>{{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">Minimum order quantity is 200kg.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="proposed_price" class="form-label">{{ 'Proposed' if action == 'place_order' else 'Counter Offer' }} Price per kg (₹)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">₹</span>
+                                        {{ form.proposed_price(class="form-control", id="proposed_price") }}
+                                    </div>
+                                    {% if form.proposed_price.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.proposed_price.errors %}
+                                                <span>{{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="message" class="form-label">Message to Farmer</label>
+                                {{ form.message(class="form-control", rows="3", placeholder="Include any additional details or requirements for your order...") }}
+                                {% if form.message.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.message.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Order Summary -->
+                            <div class="card bg-light mb-4">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Order Summary</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <p class="mb-1">Total Quantity: <strong id="total-quantity">{{ '0' if action == 'place_order' else order.items[0].quantity }}</strong> kg</p>
+                                            <p class="mb-1">Price per kg: <strong id="price-per-kg">₹0.00</strong></p>
+                                            <p class="mb-0">Total Price: <strong id="total-price">₹0.00</strong></p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p class="mb-1">Platform Commission (5%): <strong id="commission">₹0.00</strong></p>
+                                            <p class="mb-1">Farmer Payout: <strong id="farmer-payout">₹0.00</strong></p>
+                                            {% if product.price_per_kg %}
+                                            <p class="mb-0">
+                                                Savings from List Price: 
+                                                <strong id="price-savings" class="text-success">₹0.00</strong>
+                                            </p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="{{ url_for('browse_products') if action == 'place_order' else url_for('order_details', order_id=order.id) }}" class="btn btn-outline-secondary">Cancel</a>
+                                {{ form.submit(class="btn btn-primary") }}
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Important Information -->
+                <div class="card bg-light border-0">
+                    <div class="card-body">
+                        <h6><i class="fas fa-info-circle me-2"></i>Important Information</h6>
+                        <ul class="mb-0 small">
+                            <li>You can negotiate the price up to 3 times.</li>
+                            <li>Once the farmer accepts your offer, you'll be notified to proceed with payment.</li>
+                            <li>The platform charges a 5% commission on the final order amount.</li>
+                            <li>Minimum order quantity is 200kg for bulk orders.</li>
+                            <li>Orders are subject to availability and confirmation by the farmer.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Update quantity display for place order form
+        const quantityInput = document.getElementById('quantity');
+        const totalQuantityDisplay = document.getElementById('total-quantity');
+        
+        if (quantityInput && totalQuantityDisplay) {
+            quantityInput.addEventListener('input', function() {
+                totalQuantityDisplay.textContent = this.value || '0';
+            });
+            
+            // Initial update
+            totalQuantityDisplay.textContent = quantityInput.value || '0';
+        }
+        
+        // Display price per kg
+        const pricePerKgDisplay = document.getElementById('price-per-kg');
+        const proposedPriceInput = document.getElementById('proposed_price');
+        
+        if (proposedPriceInput && pricePerKgDisplay) {
+            proposedPriceInput.addEventListener('input', function() {
+                const price = parseFloat(this.value) || 0;
+                pricePerKgDisplay.textContent = '₹' + price.toFixed(2);
+            });
+            
+            // Initial update
+            const initialPrice = parseFloat(proposedPriceInput.value) || 0;
+            pricePerKgDisplay.textContent = '₹' + initialPrice.toFixed(2);
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,199 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Ratings & Reviews</h1>
+    </div>
+    
+    <!-- Rating Overview -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Rating Summary</h6>
+                </div>
+                <div class="card-body text-center">
+                    <div class="display-4 mb-3">{{ avg_rating|round(1) }}</div>
+                    <div class="rating-stars mb-3">
+                        {% for i in range(1, 6) %}
+                            <i class="fas fa-star {{ '' if i <= avg_rating|round(0) else 'text-muted' }}"></i>
+                        {% endfor %}
+                    </div>
+                    <p class="mb-0">Based on {{ received_ratings|length }} ratings</p>
+                </div>
+            </div>
+            
+            <!-- Rating Distribution -->
+            {% if received_ratings %}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Rating Distribution</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="height: 200px;">
+                        <canvas id="rating-distribution-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-md-8">
+            <!-- Tabs for ratings types -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <ul class="nav nav-tabs card-header-tabs" id="ratingTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="received-tab" data-bs-toggle="tab" data-bs-target="#received" type="button" role="tab" aria-controls="received" aria-selected="true">
+                                Received Ratings ({{ received_ratings|length }})
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="given-tab" data-bs-toggle="tab" data-bs-target="#given" type="button" role="tab" aria-controls="given" aria-selected="false">
+                                Given Ratings ({{ given_ratings|length }})
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content" id="ratingTabContent">
+                        <!-- Received Ratings -->
+                        <div class="tab-pane fade show active" id="received" role="tabpanel" aria-labelledby="received-tab">
+                            {% if received_ratings %}
+                                <div class="list-group">
+                                    {% for rating in received_ratings %}
+                                        <div class="list-group-item">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <h6 class="mb-0">
+                                                    <a href="{{ url_for('order_details', order_id=rating.order_id) }}">
+                                                        Order #{{ rating.order.order_number }}
+                                                    </a>
+                                                </h6>
+                                                <small class="text-muted">{{ rating.created_at.strftime('%d %b %Y') }}</small>
+                                            </div>
+                                            <div class="d-flex align-items-center mb-2">
+                                                <div class="rating-stars me-3">
+                                                    {% for i in range(1, 6) %}
+                                                        <i class="fas fa-star {{ '' if i <= rating.rating else 'text-muted' }}"></i>
+                                                    {% endfor %}
+                                                </div>
+                                                <div>
+                                                    <strong>{{ rating.rating }}/5</strong> by {{ rating.rater.full_name }}
+                                                </div>
+                                            </div>
+                                            {% if rating.review %}
+                                                <p class="mb-0">
+                                                    "{{ rating.review }}"
+                                                </p>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="text-center py-4">
+                                    <i class="fas fa-star fa-3x text-muted mb-3"></i>
+                                    <h5>No Ratings Yet</h5>
+                                    <p>Ratings will appear here once you complete transactions.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Given Ratings -->
+                        <div class="tab-pane fade" id="given" role="tabpanel" aria-labelledby="given-tab">
+                            {% if given_ratings %}
+                                <div class="list-group">
+                                    {% for rating in given_ratings %}
+                                        <div class="list-group-item">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <h6 class="mb-0">
+                                                    <a href="{{ url_for('order_details', order_id=rating.order_id) }}">
+                                                        Order #{{ rating.order.order_number }}
+                                                    </a>
+                                                </h6>
+                                                <small class="text-muted">{{ rating.created_at.strftime('%d %b %Y') }}</small>
+                                            </div>
+                                            <div class="d-flex align-items-center mb-2">
+                                                <div class="rating-stars me-3">
+                                                    {% for i in range(1, 6) %}
+                                                        <i class="fas fa-star {{ '' if i <= rating.rating else 'text-muted' }}"></i>
+                                                    {% endfor %}
+                                                </div>
+                                                <div>
+                                                    <strong>{{ rating.rating }}/5</strong> for {{ rating.ratee.full_name }}
+                                                </div>
+                                            </div>
+                                            {% if rating.review %}
+                                                <p class="mb-0">
+                                                    "{{ rating.review }}"
+                                                </p>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="text-center py-4">
+                                    <i class="fas fa-star fa-3x text-muted mb-3"></i>
+                                    <h5>No Ratings Given</h5>
+                                    <p>You haven't rated any transactions yet.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Improve Your Ratings</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>For Farmers</h5>
+                            <ul>
+                                <li>Ensure your product descriptions are accurate and detailed</li>
+                                <li>Maintain consistent quality for all your products</li>
+                                <li>Respond quickly to order requests and negotiations</li>
+                                <li>Package products properly to maintain freshness during delivery</li>
+                                <li>Be professional and courteous in all communications</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>For Vendors</h5>
+                            <ul>
+                                <li>Make fair and reasonable price offers during negotiations</li>
+                                <li>Complete payments promptly once orders are accepted</li>
+                                <li>Provide accurate delivery information</li>
+                                <li>Maintain clear communication throughout the ordering process</li>
+                                <li>Be respectful and professional in all interactions</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Create rating distribution chart if there are ratings
+        {% if received_ratings %}
+            const ratings = [
+                {% for rating in received_ratings %}
+                    {{ rating.rating }},
+                {% endfor %}
+            ];
+            
+            createRatingChart(ratings);
+        {% endif %}
+    });
+</script>
+{% endblock %}

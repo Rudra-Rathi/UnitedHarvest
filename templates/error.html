@@ -1,0 +1,99 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto text-center">
+            <div class="error-container mb-5">
+                {% if error_code == 404 %}
+                    <i class="fas fa-map-signs fa-5x text-muted mb-4"></i>
+                    <h1 class="display-1 fw-bold text-danger">404</h1>
+                    <h2 class="mb-4">Page Not Found</h2>
+                    <p class="lead mb-4">
+                        We couldn't find the page you were looking for. It might have been moved, deleted, or perhaps never existed.
+                    </p>
+                {% elif error_code == 403 %}
+                    <i class="fas fa-lock fa-5x text-muted mb-4"></i>
+                    <h1 class="display-1 fw-bold text-warning">403</h1>
+                    <h2 class="mb-4">Forbidden</h2>
+                    <p class="lead mb-4">
+                        You don't have permission to access this resource. If you believe this is an error, please contact support.
+                    </p>
+                {% elif error_code == 500 %}
+                    <i class="fas fa-exclamation-triangle fa-5x text-muted mb-4"></i>
+                    <h1 class="display-1 fw-bold text-danger">500</h1>
+                    <h2 class="mb-4">Server Error</h2>
+                    <p class="lead mb-4">
+                        Something went wrong on our end. Our technical team has been notified, and we're working to fix the issue.
+                    </p>
+                {% else %}
+                    <i class="fas fa-exclamation-circle fa-5x text-muted mb-4"></i>
+                    <h1 class="display-1 fw-bold text-danger">{{ error_code }}</h1>
+                    <h2 class="mb-4">{{ message }}</h2>
+                    <p class="lead mb-4">
+                        An unexpected error occurred. Please try again later or contact support if the problem persists.
+                    </p>
+                {% endif %}
+                
+                <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+                    <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg px-4">
+                        <i class="fas fa-home me-2"></i> Go to Homepage
+                    </a>
+                    <a href="{{ url_for('contact') }}" class="btn btn-outline-secondary btn-lg px-4">
+                        <i class="fas fa-envelope me-2"></i> Contact Support
+                    </a>
+                </div>
+            </div>
+            
+            <div class="mt-5">
+                <h4>Here are some helpful links instead:</h4>
+                <div class="row mt-4">
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center">
+                                <i class="fas fa-home fa-2x text-primary mb-3"></i>
+                                <h5>Homepage</h5>
+                                <p class="small">Return to our main page</p>
+                                <a href="{{ url_for('index') }}" class="btn btn-sm btn-outline-primary">Go Home</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center">
+                                {% if current_user.is_authenticated %}
+                                    <i class="fas fa-tachometer-alt fa-2x text-primary mb-3"></i>
+                                    <h5>Dashboard</h5>
+                                    <p class="small">Go to your dashboard</p>
+                                    {% if current_user.role == 'farmer' %}
+                                        <a href="{{ url_for('farmer_dashboard') }}" class="btn btn-sm btn-outline-primary">Dashboard</a>
+                                    {% else %}
+                                        <a href="{{ url_for('vendor_dashboard') }}" class="btn btn-sm btn-outline-primary">Dashboard</a>
+                                    {% endif %}
+                                {% else %}
+                                    <i class="fas fa-sign-in-alt fa-2x text-primary mb-3"></i>
+                                    <h5>Login</h5>
+                                    <p class="small">Sign in to your account</p>
+                                    <a href="{{ url_for('login') }}" class="btn btn-sm btn-outline-primary">Login</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center">
+                                <i class="fas fa-question-circle fa-2x text-primary mb-3"></i>
+                                <h5>Help & Support</h5>
+                                <p class="small">Get assistance from our team</p>
+                                <a href="{{ url_for('contact') }}" class="btn btn-sm btn-outline-primary">Contact Us</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

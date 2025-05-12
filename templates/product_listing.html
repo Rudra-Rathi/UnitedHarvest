@@ -1,0 +1,186 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container py-4">
+    {% if product is defined and product is not none %}
+        <!-- Edit Product Form -->
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">{{ 'Edit' if product else 'Add New' }} Product</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('edit_product', product_id=product.id) if product else url_for('new_product') }}">
+                            {{ form.hidden_tag() }}
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-8">
+                                    <label for="name" class="form-label">Product Name</label>
+                                    {{ form.name(class="form-control", placeholder="Enter product name") }}
+                                    {% if form.name.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.name.errors %}
+                                                <span>{{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="category" class="form-label">Category</label>
+                                    {{ form.category(class="form-select") }}
+                                    {% if form.category.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.category.errors %}
+                                                <span>{{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                {{ form.description(class="form-control", rows="3", placeholder="Add details about quality, variety, etc.") }}
+                                {% if form.description.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.description.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="price_per_kg" class="form-label">Price per kg (₹)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">₹</span>
+                                        {{ form.price_per_kg(class="form-control", placeholder="Enter price per kg") }}
+                                    </div>
+                                    {% if form.price_per_kg.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.price_per_kg.errors %}
+                                                <span>{{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="available_quantity" class="form-label">Available Quantity (kg)</label>
+                                    <div class="input-group">
+                                        {{ form.available_quantity(class="form-control", placeholder="Enter available quantity") }}
+                                        <span class="input-group-text">kg</span>
+                                    </div>
+                                    {% if form.available_quantity.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.available_quantity.errors %}
+                                                <span>{{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <div class="form-check form-switch">
+                                    {{ form.is_available(class="form-check-input", id="is_available") }}
+                                    <label class="form-check-label" for="is_available">
+                                        <span id="availability-status" class="{{ 'text-success' if product and product.is_available else 'text-danger' }}">
+                                            {{ 'Available' if product and product.is_available else 'Unavailable' }}
+                                        </span> for ordering
+                                    </label>
+                                </div>
+                                {% if form.is_available.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.is_available.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="{{ url_for('farmer_dashboard') }}" class="btn btn-outline-secondary">Cancel</a>
+                                {{ form.submit(class="btn btn-primary") }}
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <!-- Browse Products -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h2>Browse Products</h2>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex justify-content-end">
+                    <form action="{{ url_for('browse_products') }}" method="get" class="d-flex mb-3" id="search-form">
+                        <select name="category" id="category-filter" class="form-select me-2" style="width: auto;">
+                            <option value="" {% if not category %}selected{% endif %}>All Categories</option>
+                            <option value="vegetable" {% if category == 'vegetable' %}selected{% endif %}>Vegetables</option>
+                            <option value="fruit" {% if category == 'fruit' %}selected{% endif %}>Fruits</option>
+                        </select>
+                        <div class="input-group">
+                            <input type="text" name="search" id="search-input" class="form-control" placeholder="Search products..." value="{{ search }}">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {% if products %}
+            <div class="row">
+                {% for product in products %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card product-card h-100 shadow-sm">
+                        <div class="card-body">
+                            <span class="product-category">{{ product.category|capitalize }}</span>
+                            <h5 class="card-title">{{ product.name }}</h5>
+                            <p class="product-price mb-2">₹{{ product.price_per_kg }} <small>per kg</small></p>
+                            
+                            {% if product.description %}
+                            <p class="card-text small mb-3">{{ product.description|truncate(100) }}</p>
+                            {% endif %}
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted small">
+                                    <i class="fas fa-weight-hanging me-1"></i> {{ product.available_quantity }} kg available
+                                </span>
+                                <span class="text-muted small">
+                                    <i class="fas fa-user me-1"></i> {{ product.farmer.full_name }}
+                                </span>
+                            </div>
+                            <p class="card-text small text-muted">
+                                <i class="fas fa-clock me-1"></i> Updated {{ product.updated_at.strftime('%d %b, %H:%M') }}
+                            </p>
+                        </div>
+                        <div class="card-footer bg-white border-top-0">
+                            <div class="d-grid">
+                                <a href="{{ url_for('place_order', product_id=product.id) }}" class="btn btn-primary">
+                                    <i class="fas fa-shopping-cart me-1"></i> Place Order Request
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h3>No products found</h3>
+                <p class="lead">Try adjusting your search or filter criteria</p>
+                <a href="{{ url_for('browse_products') }}" class="btn btn-outline-primary mt-3">
+                    <i class="fas fa-sync me-1"></i> Show All Products
+                </a>
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

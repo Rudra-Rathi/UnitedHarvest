@@ -1,0 +1,287 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h1 class="mb-4">Welcome to United Farms</h1>
+                <p class="lead mb-5">Connecting farmers and vendors for seamless bulk produce transactions across India.</p>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                    <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg px-4 me-md-2">Get Started</a>
+                    <a href="#about" class="btn btn-outline-light btn-lg px-4">Learn More</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- About Section -->
+<section class="py-5" id="about">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h2 class="mb-4">Transforming Agricultural Commerce</h2>
+                <p class="lead mb-5">United Farms is a B2B bulk ordering platform that connects farmers directly with vendors, eliminating middlemen and ensuring fair prices for everyone.</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-leaf fa-3x text-primary"></i>
+                        </div>
+                        <h4 class="card-title">For Farmers</h4>
+                        <p class="card-text">Upload your produce listings, set your prices, and connect with multiple vendors across the country. Negotiate prices and accept orders on your terms.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-store fa-3x text-secondary"></i>
+                        </div>
+                        <h4 class="card-title">For Vendors</h4>
+                        <p class="card-text">Browse fresh produce listings, place bulk orders, negotiate prices, and build long-term relationships with reliable farmers nationwide.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-chart-line fa-3x text-success"></i>
+                        </div>
+                        <h4 class="card-title">Market Trends</h4>
+                        <p class="card-text">Stay updated with "Daily Mandi" - our real-time market trend dashboard showing pricing history to help you make informed decisions.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-lg-8 mx-auto text-center">
+                <h2 class="mb-4">How It Works</h2>
+                <p class="lead">Our simple yet powerful process makes buying and selling agricultural produce easier than ever.</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 mb-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-4" style="width: 80px; height: 80px;">
+                            <h2>1</h2>
+                        </div>
+                        <h5>Register & Verify</h5>
+                        <p class="small">Sign up as a farmer or vendor. Farmers undergo a simple verification process.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-4" style="width: 80px; height: 80px;">
+                            <h2>2</h2>
+                        </div>
+                        <h5>List & Browse</h5>
+                        <p class="small">Farmers list their produce. Vendors browse available products and price trends.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-4" style="width: 80px; height: 80px;">
+                            <h2>3</h2>
+                        </div>
+                        <h5>Order & Negotiate</h5>
+                        <p class="small">Vendors place bulk orders and can negotiate prices with farmers up to three times.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-4" style="width: 80px; height: 80px;">
+                            <h2>4</h2>
+                        </div>
+                        <h5>Fulfill & Rate</h5>
+                        <p class="small">Once orders are fulfilled, both parties can rate and review each other's service.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features -->
+<section class="py-5">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-lg-8 mx-auto text-center">
+                <h2 class="mb-4">Platform Features</h2>
+                <p class="lead">Designed to make bulk agricultural transactions seamless, transparent and profitable.</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="d-flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-handshake text-primary fa-2x me-3"></i>
+                    </div>
+                    <div>
+                        <h5>Price Negotiation</h5>
+                        <p>Our platform allows vendors to propose prices and both parties can negotiate up to three times to reach a fair agreement.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 mb-4">
+                <div class="d-flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-balance-scale text-primary fa-2x me-3"></i>
+                    </div>
+                    <div>
+                        <h5>Fair Commission</h5>
+                        <p>We charge just 5% commission on successful transactions, ensuring maximum profit goes to the farmers.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 mb-4">
+                <div class="d-flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-chart-bar text-primary fa-2x me-3"></i>
+                    </div>
+                    <div>
+                        <h5>Market Trends</h5>
+                        <p>Our "Daily Mandi" feature provides historical price data with visualizations to help make informed decisions.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 mb-4">
+                <div class="d-flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-star text-primary fa-2x me-3"></i>
+                    </div>
+                    <div>
+                        <h5>Rating System</h5>
+                        <p>Build trust with our transparent rating and review system for both farmers and vendors.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 mb-4">
+                <div class="d-flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-shield-alt text-primary fa-2x me-3"></i>
+                    </div>
+                    <div>
+                        <h5>Secure Transactions</h5>
+                        <p>All payment processing is secure and transparent with detailed order tracking.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 mb-4">
+                <div class="d-flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-globe text-primary fa-2x me-3"></i>
+                    </div>
+                    <div>
+                        <h5>Multilingual Support</h5>
+                        <p>Our platform is available in multiple languages to serve diverse users across India.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-lg-8 mx-auto text-center">
+                <h2 class="mb-4">What Our Users Say</h2>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="testimonial-card">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="rating-stars mb-3">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <p class="testimonial-text mb-3">"United Farms has transformed my business. I can now sell directly to vendors across the country and negotiate fair prices for my produce."</p>
+                            <p class="testimonial-author mb-0 fw-bold">Rajinder Singh</p>
+                            <p class="small text-muted">Farmer, Punjab</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="testimonial-card">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="rating-stars mb-3">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <p class="testimonial-text mb-3">"The platform makes it so easy to find quality produce at competitive prices. The negotiation feature helps me get the best deals for my restaurant."</p>
+                            <p class="testimonial-author mb-0 fw-bold">Priya Patel</p>
+                            <p class="small text-muted">Restaurant Owner, Mumbai</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="testimonial-card">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="rating-stars mb-3">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <p class="testimonial-text mb-3">"Daily Mandi feature helps me track price trends and make better selling decisions. My profits have increased by 30% since joining United Farms."</p>
+                            <p class="testimonial-author mb-0 fw-bold">Ravi Kumar</p>
+                            <p class="small text-muted">Organic Farmer, Karnataka</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5 bg-primary text-white">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h2 class="mb-4">Ready to Transform Your Agricultural Business?</h2>
+                <p class="lead mb-5">Join thousands of farmers and vendors who are already benefiting from our platform.</p>
+                <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                    <a href="{{ url_for('register') }}" class="btn btn-light btn-lg px-4 me-sm-3">Sign Up Now</a>
+                    <a href="{{ url_for('contact') }}" class="btn btn-outline-light btn-lg px-4">Contact Us</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

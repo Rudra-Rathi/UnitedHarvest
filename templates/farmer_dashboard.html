@@ -1,0 +1,250 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header Section -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Farmer Dashboard</h1>
+        <a href="{{ url_for('new_product') }}" class="d-none d-sm-inline-block btn btn-primary shadow-sm">
+            <i class="fas fa-plus fa-sm text-white-50 me-1"></i> Add New Product
+        </a>
+    </div>
+
+    <!-- Verification Status Alert -->
+    {% if not current_user.is_verified %}
+        {% set verification = current_user.verification %}
+        <div class="alert {% if verification %}alert-warning{% else %}alert-danger{% endif %} mb-4">
+            <div class="d-flex">
+                <div class="me-3">
+                    <i class="fas {% if verification %}fa-clock{% else %}fa-exclamation-circle{% endif %} fa-2x"></i>
+                </div>
+                <div>
+                    <h5 class="alert-heading">
+                        {% if verification %}Verification Pending{% else %}Verification Required{% endif %}
+                    </h5>
+                    {% if verification %}
+                        <p class="mb-0">Your account is currently under verification. You will be notified once approved. You can still set up your profile and add products, but they won't be visible to vendors until verification is complete.</p>
+                    {% else %}
+                        <p class="mb-0">Your account needs to be verified before you can start selling. Please complete the verification process.</p>
+                        <a href="{{ url_for('farmer_verification') }}" class="btn btn-sm btn-outline-dark mt-2">
+                            <i class="fas fa-id-card me-1"></i> Complete Verification
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Stats Cards Row -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Active Products</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ products|selectattr('is_available', 'eq', true)|list|length }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-leaf fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Pending Orders</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ orders|selectattr('status', 'in', ['pending', 'negotiating'])|list|length }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Pending Negotiations</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ pending_negotiations|length }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-comments fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Completed Orders</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ orders|selectattr('status', 'equalto', 'completed')|list|length }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products and Negotiations Section -->
+    <div class="row">
+        <!-- Products List -->
+        <div class="col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">My Products</h6>
+                    <a href="{{ url_for('new_product') }}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus fa-sm"></i> Add New
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if products %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Product Name</th>
+                                        <th>Category</th>
+                                        <th>Price (₹/kg)</th>
+                                        <th>Available (kg)</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for product in products %}
+                                    <tr>
+                                        <td>{{ product.name }}</td>
+                                        <td>
+                                            <span class="badge {% if product.category == 'vegetable' %}bg-success{% else %}bg-warning text-dark{% endif %}">
+                                                {{ product.category|capitalize }}
+                                            </span>
+                                        </td>
+                                        <td>₹{{ product.price_per_kg }}</td>
+                                        <td>{{ product.available_quantity }} kg</td>
+                                        <td>
+                                            <span class="badge {% if product.is_available %}bg-success{% else %}bg-danger{% endif %}">
+                                                {% if product.is_available %}Available{% else %}Unavailable{% endif %}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="{{ url_for('edit_product', product_id=product.id) }}" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-seedling fa-3x text-muted mb-3"></i>
+                            <p class="lead">You haven't added any products yet.</p>
+                            <a href="{{ url_for('new_product') }}" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i> Add Your First Product
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Negotiations -->
+        <div class="col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Pending Negotiations</h6>
+                </div>
+                <div class="card-body">
+                    {% if pending_negotiations %}
+                        <div class="list-group">
+                            {% for order, negotiation in pending_negotiations %}
+                                <a href="{{ url_for('order_details', order_id=order.id) }}" class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">Order #{{ order.order_number }}</h6>
+                                        <small>{{ negotiation.created_at.strftime('%d %b, %H:%M') }}</small>
+                                    </div>
+                                    <p class="mb-1">
+                                        <span class="text-primary">Offer: ₹{{ negotiation.proposed_price }}</span> per kg
+                                    </p>
+                                    <small>
+                                        <i class="fas fa-user me-1"></i> {{ order.buyer.full_name }}
+                                        {% if negotiation.message %}
+                                        <br><i class="fas fa-comment-alt me-1"></i> "{{ negotiation.message }}"
+                                        {% endif %}
+                                    </small>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+                            <p>No pending negotiations at the moment.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Recent Orders -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Recent Orders</h6>
+                </div>
+                <div class="card-body">
+                    {% if orders %}
+                        <div class="list-group">
+                            {% for order in orders %}
+                                <a href="{{ url_for('order_details', order_id=order.id) }}" class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">Order #{{ order.order_number }}</h6>
+                                        <span class="status-badge status-{{ order.status }}">{{ order.status|capitalize }}</span>
+                                    </div>
+                                    <p class="mb-1">
+                                        <span class="text-primary">₹{{ order.total_amount }}</span> 
+                                        ({{ order.items[0].quantity }}kg @ ₹{{ order.items[0].unit_price }}/kg)
+                                    </p>
+                                    <small>
+                                        <i class="fas fa-user me-1"></i> {{ order.buyer.full_name }}
+                                        <i class="fas fa-calendar-alt ms-2 me-1"></i> {{ order.created_at.strftime('%d %b %Y') }}
+                                    </small>
+                                </a>
+                            {% endfor %}
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="#" class="btn btn-sm btn-outline-primary">View All Orders</a>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                            <p>No orders received yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
