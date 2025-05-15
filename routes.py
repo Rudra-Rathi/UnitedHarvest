@@ -1,9 +1,17 @@
 import os
 import secrets
+import numpy as np
+from datetime import timedelta
+
+from sklearn.linear_model import LinearRegression
+import numpy as np
+
 from datetime import datetime
 from flask import render_template, url_for, flash, redirect, request, abort, jsonify
 from flask_login import login_user, current_user, logout_user, login_required
+from sklearn.model_selection import train_test_split
 from werkzeug.utils import secure_filename
+from xgboost import XGBRegressor
 from app import app, db
 from models import (User, FarmerVerification, Product, ProductPriceHistory, 
                    Order, OrderItem, Negotiation, Rating)
@@ -620,42 +628,68 @@ def rate_order(order_id):
         
     return redirect(url_for('order_details', order_id=order.id))
 
-# Market Trends
+import pandas as pd
+
+
+
 @app.route('/daily-mandi')
 @login_required
 def daily_mandi():
-    category = request.args.get('category', '')
+    selected_product = request.args.get('product', 'mango')  # default to 'mango'
     
-    # Get all products with their price history
-    query = db.session.query(Product)
-    
-    if category:
-        query = query.filter_by(category=category)
-        
-    products = query.all()
-    
-    # For each product, get its price history
-    product_data = []
-    for product in products:
-        price_history = ProductPriceHistory.query.filter_by(product_id=product.id).order_by(ProductPriceHistory.date).all()
-        
-        dates = [history.date.strftime('%Y-%m-%d') for history in price_history]
-        prices = [history.price for history in price_history]
-        
-        product_data.append({
-            'id': product.id,
-            'name': product.name,
-            'farmer_id': product.farmer_id,
-            'farmer_name': User.query.get(product.farmer_id).full_name,
-            'current_price': product.price_per_kg,
-            'dates': dates,
-            'prices': prices
-        })
-    
+    # Load CSV
+    csv_path = 'synthetic_mandi_data.csv'
+    df = pd.read_csv(csv_path)
+    df['date'] = pd.to_datetime(df['date'])
+    df = df.sort_values("date")
+
+    # Get available product columns (excluding date)
+    product_columns = [col for col in df.columns if col != 'date']
+    if selected_product not in product_columns:
+        selected_product = product_columns[0]  # fallback to first product
+
+    # Create lagged features
+    def create_lagged_features(df, column, n_lags=5):
+        temp_df = pd.DataFrame()
+        for i in range(1, n_lags + 1):
+            temp_df[f'{column}lag{i}'] = df[column].shift(i)
+        temp_df[f'{column}_target'] = df[column]
+        temp_df['date'] = df['date']
+        return temp_df.dropna()
+
+    lagged = create_lagged_features(df, selected_product, n_lags=5)
+
+    X = lagged[[f'{selected_product}lag{i}' for i in range(1, 6)]]
+    y = lagged[f'{selected_product}_target']
+    dates = lagged['date']
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=False, test_size=0.2)
+
+    model = XGBRegressor(n_estimators=100, learning_rate=0.1, max_depth=5)
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+
+    # Forecast next day's price
+    last_row = X.iloc[-1].values.reshape(1, -1)
+    predicted_price = float(model.predict(last_row)[0])
+    predicted_date = (df['date'].max() + timedelta(days=1)).strftime('%Y-%m-%d')
+
+    # Prepare data for chart
+    chart_dates = dates.iloc[-len(y_test):].dt.strftime('%Y-%m-%d').tolist()
+    actual_prices = y_test.tolist()
+    predicted_prices = y_pred.tolist()
+
     return render_template('daily_mandi.html',
-                          title='Daily Mandi - Price Trends',
-                          products=product_data,
-                          category=category)
+                           title='Daily Mandi - Price Trends',
+                           products=product_columns,
+                           selected_product=selected_product,
+                           unified_dates=chart_dates,
+                           avg_prices=actual_prices,
+                           predicted_date=predicted_date,
+                           predicted_price=predicted_price,
+                           latest_avg_price=actual_prices[-1],
+                           latest_max_price=max(actual_prices),
+                           latest_min_price=min(actual_prices))
 
 # Ratings and Reviews
 @app.route('/ratings')

@@ -6,17 +6,17 @@
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <div>
             <h1 class="h3 mb-0 text-gray-800">Daily Mandi - Price Trends</h1>
-            <p class="text-muted">Track historical price changes to make informed decisions</p>
+            <p class="text-muted">Track historical and predicted price changes to make informed decisions</p>
         </div>
         <div class="d-flex">
-            <select id="category-filter" class="form-select me-2">
-                <option value="">All Categories</option>
-                <option value="vegetable" {% if category == 'vegetable' %}selected{% endif %}>Vegetables</option>
-                <option value="fruit" {% if category == 'fruit' %}selected{% endif %}>Fruits</option>
-            </select>
-            <button id="refresh-btn" class="btn btn-sm btn-primary">
-                <i class="fas fa-sync-alt"></i>
-            </button>
+            <form method="get" action="/daily-mandi" class="d-flex">
+                <select name="product" id="product-filter" class="form-select me-2" onchange="this.form.submit()">
+                    {% for product in products %}
+                        <option value="{{ product }}" {% if product == selected_product %}selected{% endif %}>{{ product.capitalize() }}</option>
+                    {% endfor %}
+                </select>
+                <noscript><button type="submit" class="btn btn-sm btn-primary">Go</button></noscript>
+            </form>
         </div>
     </div>
 
@@ -25,10 +25,11 @@
         <div class="col-md-12">
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Market Overview</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">Market Overview - {{ selected_product.capitalize() }}</h6>
                 </div>
                 <div class="card-body">
                     <div class="row">
+                        <!-- Average Price -->
                         <div class="col-md-4 mb-4 mb-md-0">
                             <div class="card bg-light border-0">
                                 <div class="card-body py-3">
@@ -38,12 +39,13 @@
                                         </div>
                                         <div class="col-9">
                                             <p class="text-muted mb-1">Average Price</p>
-                                            <h4 class="mb-0" id="avg-price">₹0.00/kg</h4>
+                                            <h4 class="mb-0" id="avg-price">₹{{ latest_avg_price | round(2) }}/kg</h4>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        <!-- Highest Price -->
                         <div class="col-md-4 mb-4 mb-md-0">
                             <div class="card bg-light border-0">
                                 <div class="card-body py-3">
@@ -53,12 +55,13 @@
                                         </div>
                                         <div class="col-9">
                                             <p class="text-muted mb-1">Highest Price</p>
-                                            <h4 class="mb-0" id="max-price">₹0.00/kg</h4>
+                                            <h4 class="mb-0" id="max-price">₹{{ latest_max_price | round(2) }}/kg</h4>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        <!-- Lowest Price -->
                         <div class="col-md-4">
                             <div class="card bg-light border-0">
                                 <div class="card-body py-3">
@@ -68,79 +71,28 @@
                                         </div>
                                         <div class="col-9">
                                             <p class="text-muted mb-1">Lowest Price</p>
-                                            <h4 class="mb-0" id="min-price">₹0.00/kg</h4>
+                                            <h4 class="mb-0" id="min-price">₹{{ latest_min_price | round(2) }}/kg</h4>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Monthly Trend Chart -->
+
+                    <!-- Unified Price Trend Chart -->
                     <div class="mt-4">
-                        <h5 class="mb-3">Monthly Average Price Trend</h5>
-                        <div class="chart-container">
-                            <canvas id="monthly-trend-chart"></canvas>
+                        <h5 class="mb-3">Unified Average Price Trend (with Forecast)</h5>
+                        <div class="chart-container" style="height: 500px; width: 1200px; max-width: 100%;">
+                            <canvas id="unified-price-trend-chart"></canvas>
+                        </div>
+                        <div class="mt-3">
+                            <p><strong>Prediction for Date:</strong> {{ predicted_date }}<br>
+                            <strong>Predicted Average Price:</strong> ₹{{ predicted_price | round(2) }}/kg</p>
                         </div>
                     </div>
-                    
-                    <!-- Category Averages -->
-                    <div class="mt-2 mb-4">
-                        <h5 class="mb-3">Average Prices by Category</h5>
-                        <div class="chart-container" style="height: 250px;">
-                            <canvas id="average-price-chart"></canvas>
-                        </div>
-                    </div>
+
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Product Price Trends -->
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Product Price Trends</h6>
-        </div>
-        <div class="card-body">
-            {% if products %}
-                <div class="row">
-                    {% for product in products %}
-                    <div class="col-md-6 col-lg-4 mb-4">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                                <h6 class="mb-0 font-weight-bold">{{ product.name }}</h6>
-                                <span class="badge {% if product.category == 'vegetable' %}bg-success{% else %}bg-warning text-dark{% endif %}">
-                                    {{ product.category|capitalize }}
-                                </span>
-                            </div>
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between mb-3">
-                                    <div>
-                                        <span class="d-block text-muted small">Current Price</span>
-                                        <span class="fw-bold">₹{{ product.current_price }}/kg</span>
-                                    </div>
-                                    <div>
-                                        <span class="d-block text-muted small">Farmer</span>
-                                        <span>{{ product.farmer_name }}</span>
-                                    </div>
-                                </div>
-                                
-                                <!-- Price Trend Chart -->
-                                <div class="chart-container">
-                                    <canvas id="chart-{{ product.id }}"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="text-center py-5">
-                    <i class="fas fa-chart-bar fa-3x text-muted mb-3"></i>
-                    <h3>No price data available</h3>
-                    <p>Price history will appear as products are added and updated</p>
-                </div>
-            {% endif %}
         </div>
     </div>
 </div>
@@ -148,76 +100,68 @@
 
 {% block scripts %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialize category filter
-        const categoryFilter = document.getElementById('category-filter');
-        if (categoryFilter) {
-            categoryFilter.addEventListener('change', function() {
-                window.location.href = "{{ url_for('daily_mandi') }}?category=" + this.value;
-            });
-        }
-        
-        // Refresh button
-        const refreshBtn = document.getElementById('refresh-btn');
-        if (refreshBtn) {
-            refreshBtn.addEventListener('click', function() {
-                location.reload();
-            });
-        }
-        
-        // Product price trend charts
-        {% for product in products %}
-            createPriceChart(
-                {{ product.id }},
-                "{{ product.name }}",
-                {{ product.dates|tojson }},
-                {{ product.prices|tojson }}
-            );
-        {% endfor %}
-        
-        // Calculate statistics
-        const allPrices = [];
-        {% for product in products %}
-            {% for price in product.prices %}
-                allPrices.push({{ price }});
-            {% endfor %}
-        {% endfor %}
-        
-        if (allPrices.length > 0) {
-            // Average price
-            const avgPrice = allPrices.reduce((a, b) => a + b, 0) / allPrices.length;
-            document.getElementById('avg-price').textContent = '₹' + avgPrice.toFixed(2) + '/kg';
-            
-            // Max price
-            const maxPrice = Math.max(...allPrices);
-            document.getElementById('max-price').textContent = '₹' + maxPrice.toFixed(2) + '/kg';
-            
-            // Min price
-            const minPrice = Math.min(...allPrices);
-            document.getElementById('min-price').textContent = '₹' + minPrice.toFixed(2) + '/kg';
-            
-            // Create average price chart
-            const vegPrices = [];
-            const fruitPrices = [];
-            
-            {% for product in products %}
-                {% if product.category == 'vegetable' %}
-                    vegPrices.push({{ product.current_price }});
-                {% else %}
-                    fruitPrices.push({{ product.current_price }});
-                {% endif %}
-            {% endfor %}
-            
-            const vegAvg = vegPrices.length > 0 ? vegPrices.reduce((a, b) => a + b, 0) / vegPrices.length : 0;
-            const fruitAvg = fruitPrices.length > 0 ? fruitPrices.reduce((a, b) => a + b, 0) / fruitPrices.length : 0;
-            
-            createAveragePriceChart(
-                ['Vegetables', 'Fruits'],
-                [vegAvg, fruitAvg]
-            );
-            
-            // Create monthly trend chart
-            createMonthlyTrendChart({{ products|tojson }});
+    const unifiedDates = {{ unified_dates | tojson }};
+    const averagePrices = {{ avg_prices | tojson }};
+    const predictedDate = "{{ predicted_date }}";
+    const predictedPrice = {{ predicted_price }};
+
+    unifiedDates.push(predictedDate);
+    averagePrices.push(predictedPrice);
+
+    const ctx = document.getElementById('unified-price-trend-chart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: unifiedDates,
+            datasets: [{
+                label: 'Average Price',
+                data: averagePrices,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                fill: true,
+                tension: 0.1,
+                pointRadius: unifiedDates.map((d, i) => i === unifiedDates.length - 1 ? 6 : 3),
+                pointBackgroundColor: unifiedDates.map((d, i) => i === unifiedDates.length - 1 ? 'red' : 'rgba(75, 192, 192, 1)')
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: true, position: 'top' },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            if (context.dataIndex === unifiedDates.length - 1) {
+                                return 'Predicted Price: ₹' + context.raw.toFixed(2) + '/kg';
+                            }
+                            return 'Average Price: ₹' + context.raw.toFixed(2) + '/kg';
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Date',
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        }
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Price (₹/kg)',
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        }
+                    }
+                }
+            }
         }
     });
 </script>
